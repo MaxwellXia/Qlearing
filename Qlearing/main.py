@@ -10,6 +10,7 @@ from Database import Database
 import os
 from DrawDynamicGraph import DrawDynamicGraph
 from Common import *
+import os
 
 def GetMaxValue(array):
     temp = array[0]
@@ -80,8 +81,13 @@ for i in range(10000):#探索的次数
     #初始化本船的坐标和障碍物的坐标为原始状态
     rewardFunc.Reset()
     exporeCount = 0
-    #以下内容重复执行，直到触发终止信号
 
+    #显示进行第几次迭代
+    os.system('cls')
+    print('迭代次数: ' + str(i))
+    
+
+    #以下内容重复执行，直到触发终止信号
     while (not rewardFunc.IsEnd()) and (exporeCount < MaxExporeCount):
         exporeCount = exporeCount + 1
         
