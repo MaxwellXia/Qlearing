@@ -174,10 +174,10 @@ while (not rewardFunc.IsGotDestination()) and (count < MaxCount):
     action = actionArea[actionIndex]
 
     ###
-    ctRes = state & 0b1
-    angleRes = state &0b1110
-    distanceRes = state & 0b110000
-    aimarrowRes = state & 0b111000000
+    ctRes =   (state & 0b1) >> 0
+    angleRes = (state &0b1110) >> 1
+    distanceRes = (state & 0b110000) >> 4
+    aimarrowRes = (state & 0b111000000) >> 6
 
     print('state:' + Align(state) + ' aimarrowRes: ' + Align(aimarrowRes) + ' distanceRes: '+ Align(distanceRes) + ' angleRes: ' \
         + Align(angleRes) + ' Ct: ' + Align(ctRes) + ' angle: ' + Align(action))
@@ -214,7 +214,7 @@ while (not rewardFunc.IsGotDestination()) and (count < MaxCount):
         minY = round(rewardFunc.GetBarrierLocation().y,0)
 
 drawDynamicGraph = DrawDynamicGraph()
-drawDynamicGraph.Initialize(20,minX - 1,maxX + 1,minY - 1,maxY + 1)
+drawDynamicGraph.Initialize(10,minX - 1,maxX + 1,minY - 1,maxY + 1)
 drawDynamicGraph.SetLineInfo(agentLine,"本船",'r',barrierLine,'障碍船','y')
 drawDynamicGraph.Start()
 
