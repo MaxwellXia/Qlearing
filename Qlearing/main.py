@@ -32,7 +32,7 @@ destination.x = 0
 destination.y = 900
 
 speed = Speed()
-speed.value = 1
+speed.value = 10
 speed.angle = 0
 
 startPoint = Point()
@@ -40,7 +40,7 @@ startPoint.x = 0
 startPoint.y = 100
 
 barrierSpeed = Speed()
-barrierSpeed.value = 0.5
+barrierSpeed.value = 5
 barrierSpeed.angle = 180
 
 barrierStartPoint = Point()
@@ -77,7 +77,7 @@ database = Database()
 if os.path.exists(Database.fileName):
     database.Load(q_table)
 
-for i in range(10000):#探索的次数
+for i in range(30000):#探索的次数
     #初始化本船的坐标和障碍物的坐标为原始状态
     rewardFunc.Reset()
     exporeCount = 0
@@ -145,10 +145,9 @@ maxX = 0
 minY = 0
 maxY = 0
 count = 0
-MaxCount = 2000
+MaxCount = 200
 
-def Align(num):
-    szie = 5
+def Align(num,szie = 4):
     inStr = str(num)
     spaceNum = szie - len(inStr)
     spaceStr = ' ' * spaceNum
@@ -156,6 +155,7 @@ def Align(num):
     return res
 
 isFirstTime = True
+lastState = 0
 while (not rewardFunc.IsGotDestination()) and (count < MaxCount):
     count = count + 1
     barrierPoint = copy(rewardFunc.GetBarrierLocation())
@@ -179,18 +179,30 @@ while (not rewardFunc.IsGotDestination()) and (count < MaxCount):
     distanceRes = (state & 0b110000) >> 4
     aimarrowRes = (state & 0b111000000) >> 6
 
-    print('state:' + Align(state) + ' aimarrowRes: ' + Align(aimarrowRes) + ' distanceRes: '+ Align(distanceRes) + ' angleRes: ' \
-        + Align(angleRes) + ' Ct: ' + Align(ctRes) + ' angle: ' + Align(action))
-
     #获取x y 的刻度
     if isFirstTime:
         minX = rewardFunc.GetAgentLocation().x
         maxX = minX
         minY = rewardFunc.GetBarrierLocation().y
         maxY = minY
+        lastState = state
         isFirstTime = False
+
     #改变状态
+    if lastState == state:
+        action = 0
+    lastState = state
     rewardFunc.GetReward(action)
+
+    #打印路径信息
+    distanceWithBarrier = math.sqrt(pow(rewardFunc.GetAgentLocation().x - rewardFunc.GetBarrierLocation().x,2) + pow(rewardFunc.GetAgentLocation().y - rewardFunc.GetBarrierLocation().y,2))
+    distanceWithAim = math.sqrt(pow(rewardFunc.GetAgentLocation().x - destination.x,2) + pow(rewardFunc.GetAgentLocation().y - destination.y,2))
+    print('state:' + Align(state) + ' aimarrowRes: ' + Align(aimarrowRes) + ' distanceRes: '+ Align(distanceRes) + ' angleRes: ' \
+        + Align(angleRes) + ' Ct: ' + Align(ctRes) + ' angle: ' + Align(action) + ' X: ' + Align(round(rewardFunc.GetAgentLocation().x,1),6) \
+        + ' Y: ' + Align(round(rewardFunc.GetAgentLocation().y,1),6) + ' 与障碍物的距离: ' + Align(round(distanceWithBarrier,1))\
+        + '与目标点的距离 ' + Align(round(distanceWithAim,1)))
+    #打印结束
+
     if rewardFunc.IsGotDestination():
         agentLine.append(copy(rewardFunc.GetAgentLocation()))
         barrierLine.append(copy(rewardFunc.GetBarrierLocation()))
@@ -214,7 +226,7 @@ while (not rewardFunc.IsGotDestination()) and (count < MaxCount):
         minY = round(rewardFunc.GetBarrierLocation().y,0)
 
 drawDynamicGraph = DrawDynamicGraph()
-drawDynamicGraph.Initialize(10,minX - 1,maxX + 1,minY - 1,maxY + 1)
+drawDynamicGraph.Initialize(20,minX - 1,maxX + 1,minY - 1,maxY + 1)
 drawDynamicGraph.SetLineInfo(agentLine,"本船",'r',barrierLine,'障碍船','y')
 drawDynamicGraph.Start()
 
