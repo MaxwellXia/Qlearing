@@ -59,15 +59,15 @@ class State(object):
         aimarrow = GetAgent_AimArrow(self.destination,p1,v1.angle)
         if aimarrow < 30:
            aimarrowRes = 0
-        if aimarrow >= 30 and aimarrow < 60:
+        elif aimarrow >= 30 and aimarrow < 60:
            aimarrowRes = 1
-        if aimarrow >= 60 and aimarrow < 90:
+        elif aimarrow >= 60 and aimarrow < 90:
            aimarrowRes = 2
-        if aimarrow > 270 and aimarrow <= 300:
+        elif aimarrow > 270 and aimarrow <= 300:
            aimarrowRes = 3
-        if aimarrow > 300 and aimarrow <= 330:
+        elif aimarrow > 300 and aimarrow <= 330:
            aimarrowRes = 4
-        if aimarrow > 330 and aimarrow <= 360:
+        elif aimarrow > 330 and aimarrow <= 360:
            aimarrowRes = 5
           
         res = (aimarrowRes << self.aimarrowOffset)|(distanceRes << self.distanceOffset)|(angleRes <<  self.angleOffset) | (ctRes << self.cTOffset)

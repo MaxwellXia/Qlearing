@@ -157,13 +157,13 @@ class RiskAssessment(object):
         deviationY = p2.y - p1.y
         quadrantAngle2 = 0
         if deviationX >= 0 and deviationY >= 0:
-            quadrantAngle = 0
+            quadrantAngle2 = 0
         elif deviationX < 0 and deviationY < 0:
-            quadrantAngle = 180
+            quadrantAngle2 = 180
         elif deviationX >= 0 and deviationY < 0:
-            quadrantAngle = 180
+            quadrantAngle2 = 180
         elif deviationX < 0 and deviationY >= 0:
-            quadrantAngle = 360
+            quadrantAngle2 = 360
         temp = 0
         if 0 != deviationY:
             temp = math.atan(deviationX / deviationY ) * (180 / math.pi) + quadrantAngle2

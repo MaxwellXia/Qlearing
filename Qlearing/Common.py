@@ -30,20 +30,6 @@ def GetAimAngle(agentPoint1,aimPoint):
     aimAngle = math.atan (deviationX1/deviationY1)*(180/math.pi)+quadrantAngle3
     return aimAngle
 
-#计算无人船方向和无人船与目标连线的夹角
-#def GetAimRrrow(aimPoint,agentPoint,agentDirection,moveAngle):
-#    aimAngle = GetAimAngle(agentPoint,aimPoint)
-#    currentAngle = agentDirection + moveAngle
-#    if currentAngle > 360:
-#       currentAngle = currentAngle - 360
-#    if currentAngle < 0:
-#       currentAngle = currentAngle + 360
-#    aimarrow =abs (aimAngle-currentAngle)
-#    if aimarrow > 180 and aimarrow <= 360:
-#       aimarrow = 360 - aimarrow
-#    if aimarrow > 360: 
-#        aimarrow -= 360
-#    return aimarrow
 
 def GetAgent_AimArrow(aimPoint,agentPoint,agentDirection):
     aimAngle = GetAimAngle(agentPoint,aimPoint)
