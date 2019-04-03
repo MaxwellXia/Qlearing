@@ -111,6 +111,21 @@ class RewardFunc(object):
         res = self.rules.GetRulesAct(speed,barrierSpeed,location,barrierLocation,ucr)
         return res
 
+    #判断给定的动作是否符合规则
+    def IsActLegal(self,angle):
+        if self.IfLegalEffect():
+            legalFlag = self.GetLegalAct()
+            if legalFlag == 0:
+                return True
+            elif angle * legalFlag > 0:
+                return True
+            elif legalFlag == 2 and angle == 0:
+                return True
+            else:
+                return False
+        else:
+            return True
+
     def IfLegalEffect(self):
         if self.GetCurrentUcr() > self.rules.safetyThreshold:
             return True

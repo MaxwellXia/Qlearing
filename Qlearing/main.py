@@ -54,7 +54,7 @@ discountFactor = 0.9
 MaxExporeCount = 1500
 
 P = 0.9 #从q表中选取Q值大的动作的概率
-def GetGetGreedAction(statusIndex):
+def GetGreedAction(statusIndex):
     if random.random() > 1 - P:
         array = q_table[statusIndex]
         actionIndex = array.index(GetMaxValue(array))
@@ -77,6 +77,8 @@ database = Database()
 if os.path.exists(Database.fileName):
     database.Load(q_table)
 
+isRegularTriggered = False
+legalAction = 0
 for i in range(30000):#探索的次数
     #初始化本船的坐标和障碍物的坐标为原始状态
     rewardFunc.Reset()
@@ -95,31 +97,35 @@ for i in range(30000):#探索的次数
         #random.randrange(-30,35,5)
 
         #使用贪婪算法获取动作
-        moveAngle = GetGetGreedAction(rewardFunc.GetState())
+        moveAngle = GetGreedAction(rewardFunc.GetState())
         #moveAngle = random.randrange(-30,35,5)
 
         #如果 y 坐标相等则结束档次探索
         if 0 == round(rewardFunc.GetAgentLocation().y - destination.y,2):
             break;
         #判断选取的动作是否合法 不合法则重新选取动作,直到动作合法
-        while not IfAimArrow(moveAngle):
-           if ( rewardFunc.IfLegalEffect() ):
-            #获取合法动作
-               legalAction = rewardFunc.GetLegalAct()
+                #判断是否在正负90度            判断是否符合避障规则
+        while (not IfAimArrow(moveAngle) ) or (not rewardFunc.IsActLegal(moveAngle)):
+            if ( rewardFunc.IfLegalEffect() ):#避障规则起效了则在避障规则内选取动作，否则用贪婪选取动作
+            #获取合法规则动作
+            #判断是否第一次进入避障模式，会遇态势在每次避障中只判断一次
+               if not isRegularTriggered:
+                   legalAction = rewardFunc.GetLegalAct()
+                   isRegularTriggered = True
+
                if 2 == legalAction:
                   moveAngle = 0
                elif legalAction * moveAngle < 0:
                     if legalAction == 1:
-                       moveAngle = random.randrange(5,35,5)
+                       moveAngle = random.randrange(0,35,5)
                     elif legalAction == -1:
-                         moveAngle = random.randrange(-30,0,5)
+                         moveAngle = random.randrange(-30,5,5)
                else:
-                   moveAngle = GetGetGreedAction(rewardFunc.GetState())
-           else:
-               moveAngle = GetGetGreedAction(rewardFunc.GetState())
-           moveAngle = GetGetGreedAction(rewardFunc.GetState())
-            
-        #moveAngle = 0
+                   moveAngle = GetGreedAction(rewardFunc.GetState())
+            else:
+                moveAngle = GetGreedAction(rewardFunc.GetState())
+                isRegularTriggered = False
+
         currentQvalue = q_table[rewardFunc.GetState()][actionArea.index(moveAngle)]
         rewardValue = rewardFunc.GetReward(moveAngle)
 
