@@ -11,7 +11,7 @@ class RewardFunc(object):
     #safetyThreshold  当Ucr大于此值时将会采取避碰措施
     D1 = 200
     D2 = 300
-    AgentRadius = 5
+    AgentRadius = 50
     revierWride = 400
 
     def Initialize(self,destination,speed,startPoint,barrierSpeed,barrierStartPoint,safetyThreshold,langTa = 0.8):
@@ -36,17 +36,17 @@ class RewardFunc(object):
         orValue = self.riskAssessment.GetOrValue(p1,p2,v1,v2,abs(self.motionTrail.speed.value - self.motionTrail.barrierSpeed.value),RewardFunc.revierWride)
         lastUcr = self.riskAssessment.GetUcr(self.motionTrail.GetLastLocation(),self.motionTrail.GetBarrierLastLocation(),self.motionTrail.speed,self.motionTrail.barrierSpeed,RewardFunc.revierWride)
 
-        if self.uA <= ucr and ucr < 1:
-            if ucr < lastUcr:
-                self.langTa = 0.8
-                return 1   
-            else:
-                return -5
-        elif ucr < self.uA:
-            self.langTa = 0
-            return 0           
-        elif orValue == 1:
-            return -10
+        #if self.uA <= ucr and ucr < 1:
+        #    if ucr < lastUcr:
+        #        self.langTa = 0.8
+        #        return 1   
+        #    else:
+        #        return -5
+        #elif ucr < self.uA:
+        #    self.langTa = 0
+        #    return 0           
+        #elif orValue == 1:
+        #    return -10
 
     def GetRd(self):
         currentLocation = self.motionTrail.GetCurrentLocation()
@@ -82,12 +82,19 @@ class RewardFunc(object):
 
     def GetReward(self,angle):
         self.motionTrail.Move(angle)
-        #rc = self.GetRc()
         rd = self.GetRd()
         obstacleAvoidance = self.ObstacleAvoidance()
-        #value = self.langTa  * rc + (1 - self.langTa ) * rd
+        p1 = self.GetAgentLocation()
+        p2 = self.GetBarrierLocation()
+        if self.riskAssessment.GetDistance(p1,p2) > RewardFunc.legalEffectThreshold:
+            self.langTa = 0
+        else:
+            self.langTa = 0.8
         value = self.langTa  * obstacleAvoidance + (1 - self.langTa ) * rd
         return value
+
+    def PreMove(self,moveAngle):
+        return self.motionTrail.PreMove(moveAngle)
 
     def Reset(self):
         self.motionTrail.Reset()
@@ -126,8 +133,11 @@ class RewardFunc(object):
         else:
             return True
 
+    legalEffectThreshold = 300
     def IfLegalEffect(self):
-        if self.GetCurrentUcr() > self.rules.safetyThreshold:
+        p1 = self.GetAgentLocation()
+        p2 = self.GetBarrierLocation()
+        if self.riskAssessment.GetDistance(p1,p2) < RewardFunc.legalEffectThreshold:
             return True
         else:
             return False

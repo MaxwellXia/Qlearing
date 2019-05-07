@@ -1,5 +1,6 @@
 import math
 from copy import copy
+from DataType import Point
 
 class MotionTrail(object):
     """description of class"""
@@ -33,6 +34,14 @@ class MotionTrail(object):
         self.barrierLastLocation = copy(self.barrierCurrentLocation)
         self.barrierCurrentLocation.x = self.barrierCurrentLocation.x + self.barrierSpeed.value * math.sin(self.barrierSpeed.angle * (math.pi / 180))
         self.barrierCurrentLocation.y = self.barrierCurrentLocation.y + self.barrierSpeed.value * math.cos(self.barrierSpeed.angle * (math.pi / 180))
+
+    #按照给定的角度运行但是不改变智能体和障碍物的坐标，并且返回以动后的坐标
+    def PreMove(self,changeAngle):
+        point = Point()
+        point.x = self.currentLocation.x + self.speed.value * math.sin( (self.speed.angle + changeAngle) * (math.pi / 180))
+        point.y = self.currentLocation.y + self.speed.value * math.cos( (self.speed.angle + changeAngle )* (math.pi / 180))
+        return point
+
 
     def GetCurrentLocation(self):
         return self.currentLocation

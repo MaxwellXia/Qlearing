@@ -69,6 +69,8 @@ class State(object):
            aimarrowRes = 4
         elif aimarrow > 330 and aimarrow <= 360:
            aimarrowRes = 5
+        else:
+           aimarrowRes = 6
           
         res = (aimarrowRes << self.aimarrowOffset)|(distanceRes << self.distanceOffset)|(angleRes <<  self.angleOffset) | (ctRes << self.cTOffset)
         return res

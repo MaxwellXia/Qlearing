@@ -1,4 +1,4 @@
-from RewardFunc import RewardFunc
+﻿from RewardFunc import RewardFunc
 import pandas as pd
 from DataType import *
 import random
@@ -45,15 +45,15 @@ barrierSpeed.angle = 180
 
 barrierStartPoint = Point()
 barrierStartPoint.x = 0
-barrierStartPoint.y = 900
+barrierStartPoint.y = 1000
 
 safetyThreshold = 0.5
 rewardFunc.Initialize(destination,speed,startPoint,barrierSpeed,barrierStartPoint,safetyThreshold)
 learningRate = 0.8
 discountFactor = 0.9
-MaxExporeCount = 1500
+MaxExporeCount = 200
 
-P = 0.9 #从q表中选取Q值大的动作的概率
+P = 0.98 #从q表中选取Q值大的动作的概率
 def GetGreedAction(statusIndex):
     if random.random() > 1 - P:
         array = q_table[statusIndex]
@@ -65,9 +65,9 @@ def GetGreedAction(statusIndex):
 
     #判断无人船方向和无人船与目标连线的夹角在正负90°以内,如果不在范围内，就要换动作   
 def IfAimArrow(moveAngle):
-    currentangle = rewardFunc.GetSpeed().angle + moveAngle
-    aimarrow = GetAgent_AimArrow(destination,rewardFunc.GetAgentLocation(),currentangle)
-    if aimarrow <= 90 or aimarrow >= 270:
+    preAngle = rewardFunc.GetSpeed().angle + moveAngle
+    aimarrow = GetAgent_AimArrow(destination,rewardFunc.PreMove(moveAngle),preAngle)
+    if aimarrow < 90 or aimarrow > 270:
         return True 
     else:
         return False 
@@ -79,7 +79,7 @@ if os.path.exists(Database.fileName):
 
 isRegularTriggered = False
 legalAction = 0
-for i in range(30000):#探索的次数
+for i in range(5000000):#探索的次数
     #初始化本船的坐标和障碍物的坐标为原始状态
     rewardFunc.Reset()
     exporeCount = 0
@@ -93,38 +93,32 @@ for i in range(30000):#探索的次数
     while (not rewardFunc.IsEnd()) and (exporeCount < MaxExporeCount):
         exporeCount = exporeCount + 1
         
-        #随机选择一个动作
-        #random.randrange(-30,35,5)
-
         #使用贪婪算法获取动作
         moveAngle = GetGreedAction(rewardFunc.GetState())
-        #moveAngle = random.randrange(-30,35,5)
 
-        #如果 y 坐标相等则结束档次探索
-        if 0 == round(rewardFunc.GetAgentLocation().y - destination.y,2):
-            break;
         #判断选取的动作是否合法 不合法则重新选取动作,直到动作合法
                 #判断是否在正负90度            判断是否符合避障规则
-        while (not IfAimArrow(moveAngle) ) or (not rewardFunc.IsActLegal(moveAngle)):
-            if ( rewardFunc.IfLegalEffect() ):#避障规则起效了则在避障规则内选取动作，否则用贪婪选取动作
-            #获取合法规则动作
-            #判断是否第一次进入避障模式，会遇态势在每次避障中只判断一次
-               if not isRegularTriggered:
-                   legalAction = rewardFunc.GetLegalAct()
-                   isRegularTriggered = True
-
-               if 2 == legalAction:
-                  moveAngle = 0
-               elif legalAction * moveAngle < 0:
-                    if legalAction == 1:
-                       moveAngle = random.randrange(0,35,5)
-                    elif legalAction == -1:
-                         moveAngle = random.randrange(-30,5,5)
-               else:
-                   moveAngle = GetGreedAction(rewardFunc.GetState())
-            else:
-                moveAngle = GetGreedAction(rewardFunc.GetState())
-                isRegularTriggered = False
+        #while (not IfAimArrow(moveAngle) ) or (not rewardFunc.IsActLegal(moveAngle)):
+        #while not rewardFunc.IsActLegal(moveAngle):
+        if ( rewardFunc.IfLegalEffect() ):#避障规则起效了则在避障规则内选取动作，否则用贪婪选取动作
+        #获取合法规则动作
+        #判断是否第一次进入避障模式，会遇态势在每次避障中只判断一次
+           if not isRegularTriggered:
+               legalAction = rewardFunc.GetLegalAct()
+               isRegularTriggered = True
+        
+           if 2 == legalAction:
+              moveAngle = 0
+           elif legalAction * moveAngle < 0:
+                if legalAction == 1:
+                   moveAngle = random.randrange(0,35,5)
+                elif legalAction == -1:
+                     moveAngle = random.randrange(-30,5,5)
+           else:
+               moveAngle = GetGreedAction(rewardFunc.GetState())
+        else:
+            moveAngle = GetGreedAction(rewardFunc.GetState())
+            isRegularTriggered = False
 
         currentQvalue = q_table[rewardFunc.GetState()][actionArea.index(moveAngle)]
         rewardValue = rewardFunc.GetReward(moveAngle)
@@ -232,7 +226,7 @@ while (not rewardFunc.IsGotDestination()) and (count < MaxCount):
         minY = round(rewardFunc.GetBarrierLocation().y,0)
 
 drawDynamicGraph = DrawDynamicGraph()
-drawDynamicGraph.Initialize(20,minX - 1,maxX + 1,minY - 1,maxY + 1)
+drawDynamicGraph.Initialize(80,minX - 1,maxX + 1,minY - 1,maxY + 1)
 drawDynamicGraph.SetLineInfo(agentLine,"本船",'r',barrierLine,'障碍船','y')
 drawDynamicGraph.Start()
 
